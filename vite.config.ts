@@ -21,9 +21,19 @@ export default defineConfig({
 			{
 				extends: './vite.config.ts',
 				test: {
-					name: 'server',
+					name: 'unit',
 					environment: 'node',
 					include: ['tests/unit/**/*.test.ts', 'src/**/*.test.ts']
+				}
+			},
+			{
+				// Needs the local database: `pnpm db:start`.
+				extends: './vite.config.ts',
+				test: {
+					name: 'integration',
+					environment: 'node',
+					include: ['tests/integration/**/*.test.ts'],
+					fileParallelism: false
 				}
 			}
 		]

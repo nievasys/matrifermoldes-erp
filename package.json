@@ -9,21 +9,22 @@
 	},
 	"scripts": {
 		"dev": "vite dev",
-		"build": "wrangler types --check && vite build",
+		"build": "pnpm run gen && vite build",
 		"preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
 		"prepare": "svelte-kit sync || echo \"\"",
-		"typecheck": "wrangler types --check && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"typecheck": "pnpm run gen && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"test:unit": "vitest --run --passWithNoTests",
+		"test:unit": "vitest --run --project unit --passWithNoTests",
 		"test:db": "supabase test db",
 		"test:e2e": "playwright test",
-		"test": "pnpm run test:unit && pnpm run test:db",
+		"test:integration": "vitest --run --project integration",
+		"test": "pnpm run test:unit && pnpm run test:db && pnpm run test:integration",
 		"db:start": "supabase start",
 		"db:stop": "supabase stop",
 		"db:reset": "supabase db reset",
-		"db:pull": "drizzle-kit pull",
-		"gen": "wrangler types"
+		"db:pull": "node scripts/db-pull.mjs",
+		"gen": "wrangler types --include-main-module=false"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

@@ -1,12 +1,21 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
-// for information about these interfaces
+import type { Db } from '#lib/server/db/client.ts';
+
 declare global {
 	namespace App {
 		// interface Error {}
-		// interface Locals {}
+		interface Locals {
+			/** Per-request database client. Writes must go through `withActor`. */
+			db: Db;
+		}
 		// interface PageData {}
 		// interface PageState {}
-		// interface Platform {}
+		interface Platform {
+			env: Env;
+			ctx: ExecutionContext;
+			caches: CacheStorage;
+			cf?: IncomingRequestCfProperties;
+		}
 	}
 }
 

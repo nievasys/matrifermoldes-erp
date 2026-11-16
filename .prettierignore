@@ -15,7 +15,6 @@ bun.lockb
 
 # Generated
 /src/lib/server/db/schema.ts
-/src/lib/server/db/relations.ts
 /worker-configuration.d.ts
 /supabase/.temp/
 /supabase/.branches/
