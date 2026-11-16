@@ -1,0 +1,27 @@
+{
+	"title": "Dashboard de Administración",
+	"brief": "Dashboard del Administrador de Matrifer ERP: facturación, piezas, gastos y ganancia neta del período, con alertas de líneas sin precio y partes a revisar. Escritorio 1440 × 900.",
+	"artboards": [
+		{
+			"file": "01-resumen-del-dia.html",
+			"title": "Resumen del día",
+			"tradeoff": "Cálido y operativo: saludo y línea de tiempo del turno arriba. El detalle financiero queda más abajo y exige scroll.",
+			"width": 1440,
+			"height": 900
+		},
+		{
+			"file": "02-resultado-del-periodo.html",
+			"title": "Resultado del período",
+			"tradeoff": "Pensado para el cierre: la ecuación facturación − gastos = ganancia es la protagonista. Se pierde la sensación de qué pasa hoy en planta.",
+			"width": 1440,
+			"height": 900
+		},
+		{
+			"file": "03-tablero-denso.html",
+			"title": "Tablero denso",
+			"tradeoff": "Todo en una pantalla sin scroll, con tabla de partes de hoy. Menos aire y gráficos más chicos; se aleja de la calma de la referencia.",
+			"width": 1440,
+			"height": 900
+		}
+	]
+}

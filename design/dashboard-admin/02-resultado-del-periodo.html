@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Dashboard — Matrifer ERP</title>
+<style>
+:root {
+  --font-sans: "Plus Jakarta Sans Variable","Plus Jakarta Sans",ui-sans-serif,system-ui,sans-serif;
+  --font-display: "Space Grotesk Variable","Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --color-bg: #efefec;
+  --color-surface: #f8f8f6;
+  --color-raised: #fcfcfb;
+  --color-solid: #ffffff;
+  --color-ink: #020611;
+  --color-on-ink: #f7f7f5;
+  --color-ink-soft: #3b4a5e;
+  --color-muted: #5c5c5a;
+  --color-line: rgb(2 6 17 / 0.09);
+  --color-line-strong: rgb(2 6 17 / 0.16);
+  --color-well: rgb(2 6 17 / 0.06);
+  --color-accent: #01c1f2;
+  --color-accent-tint: #e6f7fd;
+  --color-accent-strong: #2563eb;
+  --color-indigo: #4426bc;
+  --color-positive: #237a48;
+  --color-warning: #8f6000;
+  --color-danger: #bf3644;
+  --color-coral: #c9542b;
+  --color-slate: #637083;
+  --color-earth: #8f6243;
+  --radius-card: 1.5rem;
+  --radius-tile: 1rem;
+  --radius-ctl: 999px;
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.7) inset, 0 24px 48px -30px rgb(0 0 0 / 0.22);
+  --shadow-pop: 0 24px 60px -18px rgb(0 0 0 / 0.28), 0 2px 6px rgb(0 0 0 / 0.07);
+  --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dock-w: 72px;
+  --gutter: 20px;
+}
+* { box-sizing: border-box; }
+html { background: var(--color-bg); color: var(--color-ink); font-family: var(--font-sans); font-size: 14px; -webkit-font-smoothing: antialiased; }
+body { margin: 0; min-height: 100vh;  }
+h1,h2,h3 { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.025em; margin: 0; }
+p { margin: 0; }
+a { color: var(--color-accent-strong); text-decoration: none; font-weight: 600; }
+a:hover { text-decoration: underline; }
+:where(a,button,input,select):focus-visible { outline: 2px solid var(--color-accent-strong); outline-offset: 2px; }
+
+/* Left dock - floating */
+.dock { position: fixed; left: 16px; top: 180px; width: 48px; background: var(--color-ink); border-radius: var(--radius-card); display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 4px; z-index: 100; box-shadow: var(--shadow-pop); }
+.dock-btn { width: 36px; height: 36px; border-radius: var(--radius-tile); border: 0; background: transparent; color: var(--color-on-ink); opacity: 0.6; cursor: pointer; display: grid; place-items: center; }
+.dock-btn:hover, .dock-btn:focus-visible { opacity: 1; background: rgb(255 255 255 / 0.1); }
+.dock-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.dock-sep { width: 20px; height: 1px; background: rgb(255 255 255 / 0.12); margin: 4px 0; }
+
+/* Top bar - no background, elements float on page bg */
+.topbar { margin: var(--gutter) var(--gutter) 0; margin-left: calc(var(--dock-w) + var(--gutter)); display: flex; align-items: center; gap: 20px; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-logo { width: 44px; height: 44px; background: var(--color-ink); border-radius: var(--radius-tile); display: grid; place-items: center; }
+.brand-logo svg { width: 24px; height: 24px; fill: var(--color-on-ink); }
+.brand-text { display: flex; flex-direction: column; }
+.brand-name { font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--color-ink); line-height: 1.2; }
+.brand-sub { font-size: 11px; color: var(--color-muted); }
+.nav-pill { display: flex; gap: 4px; padding: 6px; background: var(--color-solid); border-radius: var(--radius-ctl); list-style: none; margin: 0 auto; box-shadow: var(--shadow-card); }
+.nav-pill a { display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; height: 36px; border-radius: var(--radius-ctl); color: var(--color-ink-soft); font-weight: 600; font-size: 13px; }
+.nav-pill a:hover { background: var(--color-well); text-decoration: none; }
+.nav-pill a[aria-current="page"] { background: var(--color-ink); color: var(--color-on-ink); }
+.count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--radius-ctl); background: var(--color-danger); color: var(--color-on-ink); font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.icon-btn { width: 40px; height: 40px; border-radius: var(--radius-ctl); border: 1px solid var(--color-line); background: var(--color-solid); display: grid; place-items: center; cursor: pointer; }
+.icon-btn svg { width: 20px; height: 20px; stroke: var(--color-ink-soft); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.avatar { width: 40px; height: 40px; border-radius: var(--radius-ctl); background: var(--color-accent-tint); color: var(--color-ink); font-weight: 700; font-size: 14px; display: grid; place-items: center; }
+
+/* Page layout */
+.wrap { max-width: 1140px; margin: 0 auto; padding: var(--gutter); }
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 16px; }
+.page-header-left { flex: 1; }
+.crumbs { font-size: 12px; color: var(--color-muted); margin-bottom: 4px; }
+.crumbs a { color: var(--color-accent-strong); font-weight: 400; }
+.page-title { font-size: 28px; line-height: 1.2; }
+.period-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.period-nav { display: flex; align-items: center; gap: 4px; }
+.period-nav button { width: 28px; height: 28px; border-radius: var(--radius-ctl); border: 1px solid var(--color-line-strong); background: var(--color-solid); display: grid; place-items: center; cursor: pointer; }
+.period-nav button svg { width: 14px; height: 14px; stroke: var(--color-ink-soft); fill: none; stroke-width: 2; }
+.period-nav span { font-weight: 600; font-size: 14px; min-width: 140px; text-align: center; }
+.period-select select { font: inherit; font-size: 13px; font-weight: 600; height: 32px; padding: 0 10px; border-radius: var(--radius-ctl); border: 1px solid var(--color-line-strong); background: var(--color-solid); color: var(--color-ink); cursor: pointer; }
+.badge { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: var(--radius-ctl); background: var(--color-solid); border: 1px solid var(--color-line); font-size: 12px; font-weight: 600; }
+.dot { width: 8px; height: 8px; border-radius: var(--radius-ctl); flex: none; }
+.dot.positive { background: var(--color-positive); }
+.meta-text { font-size: 11px; color: var(--color-muted); }
+
+/* Hero equation */
+.hero-eq { background: var(--color-surface); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 28px 32px; display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 20px; align-items: center; margin-bottom: 14px; }
+.eq-block { text-align: center; }
+.eq-block .eq-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-muted); font-weight: 600; margin-bottom: 6px; }
+.eq-block .eq-value { font-family: var(--font-display); font-size: 28px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.eq-block .eq-sub { font-size: 12px; color: var(--color-muted); margin-top: 4px; }
+.eq-block .eq-link { font-size: 12px; margin-top: 6px; }
+.eq-block.result { background: var(--color-ink); color: var(--color-on-ink); border-radius: var(--radius-tile); padding: 20px 28px; }
+.eq-block.result .eq-label { color: var(--color-on-ink); opacity: 0.7; }
+.eq-block.result .eq-sub { color: var(--color-accent); }
+.eq-block.result .eq-link a { color: var(--color-on-ink); opacity: 0.7; }
+.eq-block.result .eq-link a:hover { opacity: 1; }
+.eq-op { font-family: var(--font-display); font-size: 28px; font-weight: 300; color: var(--color-muted); }
+.eq-pieces { font-size: 12px; color: var(--color-ink-soft); margin-top: 2px; }
+
+/* Alerts */
+.alert-banner { display: flex; align-items: center; gap: 14px; background: rgb(191 54 68 / 0.06); border: 1px solid rgb(191 54 68 / 0.15); border-radius: var(--radius-tile); padding: 12px 18px; margin-bottom: 10px; }
+.alert-banner svg { width: 18px; height: 18px; stroke: var(--color-danger); fill: none; stroke-width: 2; flex: none; }
+.alert-banner p { flex: 1; font-size: 13px; }
+.alert-banner strong { font-weight: 600; color: var(--color-danger); }
+.alert-banner a { font-weight: 600; white-space: nowrap; font-size: 13px; }
+.alert-note { display: flex; align-items: center; gap: 10px; padding: 10px 18px; font-size: 12px; color: var(--color-ink-soft); background: var(--color-well); border-radius: var(--radius-tile); margin-bottom: 14px; }
+.alert-note svg { width: 16px; height: 16px; stroke: var(--color-warning); fill: none; stroke-width: 2; flex: none; }
+
+/* Cards grid */
+.cards-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.card { background: var(--color-surface); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 22px 26px; }
+.card h2 { font-size: 16px; margin-bottom: 14px; }
+
+/* BarList */
+.barlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.barlist li { display: grid; grid-template-columns: 130px 1fr 100px; gap: 10px; align-items: center; font-size: 13px; }
+.barlist .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.barlist .track { height: 8px; background: var(--color-well); border-radius: var(--radius-ctl); overflow: hidden; }
+.barlist .fill { height: 100%; background: var(--color-accent-strong); border-radius: var(--radius-ctl); }
+.barlist .val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.barlist .val small { font-weight: 400; color: var(--color-muted); font-size: 11px; margin-left: 4px; }
+
+/* Bottom row */
+.bottom-row { display: grid; grid-template-columns: 1fr 320px; gap: 14px; }
+
+/* Stacked bar */
+.stacked-wrap { margin-bottom: 12px; }
+.stacked-bar { display: flex; height: 20px; border-radius: var(--radius-ctl); overflow: hidden; }
+.stacked-bar span { display: block; }
+.stacked-legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px 14px; margin-top: 10px; font-size: 12px; }
+.stacked-legend .leg { display: flex; align-items: flex-start; gap: 8px; }
+.stacked-legend .leg-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 3px; flex: none; }
+.stacked-legend .leg-name { color: var(--color-ink-soft); }
+.stacked-legend .leg-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* Close card */
+.close-card { background: var(--color-solid); }
+.close-card h2 { margin-bottom: 16px; }
+.checklist { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 8px; }
+.checklist li { display: flex; align-items: center; gap: 10px; font-size: 13px; padding: 10px 12px; background: var(--color-surface); border-radius: var(--radius-tile); }
+.checklist .icon { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+.checklist .icon svg { width: 14px; height: 14px; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.checklist .icon.ok { background: rgb(35 122 72 / 0.1); }
+.checklist .icon.ok svg { stroke: var(--color-positive); }
+.checklist .icon.warn { background: rgb(143 96 0 / 0.1); }
+.checklist .icon.warn svg { stroke: var(--color-warning); }
+.checklist .icon.block { background: rgb(191 54 68 / 0.1); }
+.checklist .icon.block svg { stroke: var(--color-danger); }
+.checklist .text { flex: 1; }
+.checklist .text strong { display: block; font-weight: 600; }
+.checklist .text span { font-size: 11px; color: var(--color-muted); }
+.btn { font: inherit; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; border-radius: var(--radius-ctl); border: 1px solid var(--color-ink); background: var(--color-ink); color: var(--color-on-ink); cursor: pointer; padding: 0 16px; height: 38px; font-size: 13px; }
+.btn:hover { box-shadow: var(--shadow-pop); }
+.btn.secondary { background: var(--color-solid); color: var(--color-ink); border-color: var(--color-line-strong); }
+.btn.secondary:hover { background: var(--color-raised); box-shadow: none; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.btn-row { display: flex; gap: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Left dock -->
+<!-- Left dock - floating -->
+<aside class="dock" aria-label="Accesos rápidos">
+  <button class="dock-btn" aria-label="Buscar"><svg><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+  <button class="dock-btn" aria-label="Crear"><svg><path d="M12 5v14M5 12h14"/></svg></button>
+  <div class="dock-sep"></div>
+  <button class="dock-btn" aria-label="Modo oscuro"><svg><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  <button class="dock-btn" aria-label="Calendario"><svg><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
+  <button class="dock-btn" aria-label="Configuración"><svg><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+</aside>
+
+<!-- Floating top nav -->
+<!-- Floating top nav -->
+<nav class="topbar" aria-label="Navegación principal">
+  <div class="brand">
+    <div class="brand-logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div class="brand-text">
+      <span class="brand-name">Matrifer</span>
+      <span class="brand-sub">Moldes Moreno</span>
+    </div>
+  </div>
+  <ul class="nav-pill">
+    <li><a href="#" aria-current="page">Dashboard</a></li>
+    <li><a href="#">Producción <span class="count">6</span></a></li>
+    <li><a href="#">Gastos</a></li>
+    <li><a href="#">Precios</a></li>
+    <li><a href="#">Facturación</a></li>
+    <li><a href="#">Períodos</a></li>
+    <li><a href="#">Catálogos</a></li>
+  </ul>
+  <div class="topbar-right">
+    <button class="icon-btn" aria-label="Notificaciones">
+      <svg><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </button>
+    <div class="avatar" aria-label="Marcela Almada">MA</div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <header class="page-header">
+    <div class="page-header-left">
+      <nav class="crumbs" aria-label="Migas de pan"><a href="#">Inicio</a> › Dashboard</nav>
+      <h1 class="page-title">Dashboard</h1>
+      <div class="period-row">
+        <div class="period-nav">
+          <button aria-label="Mes anterior"><svg><polyline points="15 18 9 12 15 6"/></svg></button>
+          <span>Noviembre 2026</span>
+          <button aria-label="Mes siguiente"><svg><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+        <div class="period-select">
+          <select aria-label="Mes"><option>Noviembre</option></select>
+          <select aria-label="Año"><option>2026</option></select>
+        </div>
+        <span class="badge"><span class="dot positive"></span> Abierto</span>
+        <span class="meta-text">Actualizado hace 1 min</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero-eq" aria-label="Resultado del período">
+    <article class="eq-block">
+      <p class="eq-label">Facturación</p>
+      <p class="eq-value">$ 18.426.375,00</p>
+      <p class="eq-sub">Producción $ 17.576.375 · Externa $ 850.000</p>
+      <p class="eq-pieces">28.893 piezas</p>
+      <p class="eq-link"><a href="#">Ver detalle</a></p>
+    </article>
+    <span class="eq-op" aria-hidden="true">−</span>
+    <article class="eq-block">
+      <p class="eq-label">Gastos deducibles</p>
+      <p class="eq-value">$ 6.204.110,50</p>
+      <p class="eq-sub">+12,6 % frente a octubre</p>
+      <p class="eq-link"><a href="#">Ver detalle</a></p>
+    </article>
+    <span class="eq-op" aria-hidden="true">=</span>
+    <article class="eq-block result">
+      <p class="eq-label">Ganancia neta</p>
+      <p class="eq-value">$ 12.222.264,50</p>
+      <p class="eq-sub">Margen 66,3 %</p>
+      <p class="eq-link"><a href="#">Ver detalle</a></p>
+    </article>
+  </section>
+
+  <div class="alert-banner" role="alert">
+    <svg><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <p><strong>3 líneas de producción sin precio vigente.</strong> El total de facturación está incompleto y no se puede cerrar el período.</p>
+    <a href="#">Cargar precios</a>
+  </div>
+
+  <div class="alert-note">
+    <svg><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+    <span><strong>6 partes a revisar:</strong> se cargaron fuera del horario del turno. <a href="#">Ver partes</a></span>
+  </div>
+
+  <section class="cards-row">
+    <article class="card">
+      <h2>Facturación por máquina</h2>
+      <ul class="barlist">
+        <li><span class="name">Inyectora 3</span><span class="track"><span class="fill" style="width: 100%;"></span></span><span class="val">$ 6.276.340<small>9.840 pzs</small></span></li>
+        <li><span class="name">Inyectora 1</span><span class="track"><span class="fill" style="width: 78%;"></span></span><span class="val">$ 4.893.770<small>7.675 pzs</small></span></li>
+        <li><span class="name">Inyectora 2</span><span class="track"><span class="fill" style="width: 63%;"></span></span><span class="val">$ 3.951.960<small>6.198 pzs</small></span></li>
+        <li><span class="name">Inyectora 4</span><span class="track"><span class="fill" style="width: 39%;"></span></span><span class="val">$ 2.454.305<small>5.180 pzs</small></span></li>
+      </ul>
+    </article>
+    <article class="card">
+      <h2>Facturación por molde</h2>
+      <ul class="barlist">
+        <li><span class="name">Respaldos grandes verde</span><span class="track"><span class="fill" style="width: 100%;"></span></span><span class="val">$ 6.275.460<small>9.840 pzs</small></span></li>
+        <li><span class="name">Tapa balde 20 L</span><span class="track"><span class="fill" style="width: 73%;"></span></span><span class="val">$ 4.605.000<small>7.675 pzs</small></span></li>
+        <li><span class="name">Cajón frutero</span><span class="track"><span class="fill" style="width: 59%;"></span></span><span class="val">$ 3.718.800<small>6.198 pzs</small></span></li>
+        <li><span class="name">Maceta N.º 30</span><span class="track"><span class="fill" style="width: 47%;"></span></span><span class="val">$ 2.977.115<small>5.180 pzs</small></span></li>
+      </ul>
+    </article>
+  </section>
+
+  <section class="bottom-row">
+    <article class="card">
+      <h2>Gastos por categoría</h2>
+      <div class="stacked-wrap">
+        <div class="stacked-bar" role="img" aria-label="Gastos desglosados">
+          <span style="width: 50.8%; background: var(--color-accent-strong);"></span>
+          <span style="width: 22.9%; background: var(--color-indigo);"></span>
+          <span style="width: 12.6%; background: var(--color-coral);"></span>
+          <span style="width: 8.4%; background: var(--color-slate);"></span>
+          <span style="width: 3.8%; background: var(--color-earth);"></span>
+          <span style="width: 1.6%; background: var(--color-positive);"></span>
+        </div>
+        <div class="stacked-legend">
+          <div class="leg"><span class="leg-dot" style="background: var(--color-accent-strong);"></span><div><span class="leg-name">Sueldos</span><br><span class="leg-val">$ 3.150.000</span></div></div>
+          <div class="leg"><span class="leg-dot" style="background: var(--color-indigo);"></span><div><span class="leg-name">Insumos</span><br><span class="leg-val">$ 1.420.500</span></div></div>
+          <div class="leg"><span class="leg-dot" style="background: var(--color-coral);"></span><div><span class="leg-name">Electricidad</span><br><span class="leg-val">$ 780.300,50</span></div></div>
+          <div class="leg"><span class="leg-dot" style="background: var(--color-slate);"></span><div><span class="leg-name">Alquiler</span><br><span class="leg-val">$ 520.000</span></div></div>
+          <div class="leg"><span class="leg-dot" style="background: var(--color-earth);"></span><div><span class="leg-name">Impuestos</span><br><span class="leg-val">$ 233.310</span></div></div>
+          <div class="leg"><span class="leg-dot" style="background: var(--color-positive);"></span><div><span class="leg-name">Seguros</span><br><span class="leg-val">$ 100.000</span></div></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="card close-card">
+      <h2>Cierre del período</h2>
+      <ul class="checklist">
+        <li>
+          <span class="icon block"><svg><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+          <div class="text"><strong>3 líneas sin precio</strong><span>Bloquea el cierre</span></div>
+        </li>
+        <li>
+          <span class="icon warn"><svg><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+          <div class="text"><strong>6 partes a revisar</strong><span>Se puede cerrar, quedan pendientes</span></div>
+        </li>
+        <li>
+          <span class="icon ok"><svg><polyline points="20 6 9 17 4 12"/></svg></span>
+          <div class="text"><strong>Gastos cargados</strong><span>Todos registrados</span></div>
+        </li>
+      </ul>
+      <div class="btn-row">
+        <button class="btn secondary"><svg><path d="M12 5v14M5 12h14"/></svg> Cargar gasto</button>
+        <button class="btn" disabled>Cerrar período</button>
+      </div>
+    </article>
+  </section>
+</main>
+
+</body>
+</html>
