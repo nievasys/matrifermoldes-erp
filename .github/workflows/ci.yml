@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # package.json has no "packageManager" field, so the pnpm version is pinned here.
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Local defaults only (points at the Supabase instance started below); no secrets.
+      - run: cp .env.example .env
+
+      - run: pnpm lint
+
+      - run: pnpm typecheck
+
+      # Starts local Supabase with the CLI devDependency; needs Docker, available on ubuntu-latest.
+      - run: pnpm db:start
+
+      # Unit + pgTAP + integration against the local database.
+      - run: pnpm test
+
+      - run: pnpm build
