@@ -1,0 +1,5 @@
+allowBuilds:
+  workerd: true
+  esbuild: true
+  supabase: true
+engineStrict: true
