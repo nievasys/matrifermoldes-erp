@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Sistema de diseño — Matrifer ERP</title>
+<style>
+/* Tokens: exact values from src/routes/layout.css (@theme). Use only these. */
+:root {
+  --font-sans: "Plus Jakarta Sans Variable","Plus Jakarta Sans",ui-sans-serif,system-ui,sans-serif;
+  --font-display: "Space Grotesk Variable","Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+
+  --color-bg: #efefec;
+  --color-surface: #f8f8f6;
+  --color-raised: #fcfcfb;
+  --color-solid: #ffffff;
+
+  --color-ink: #020611;
+  --color-on-ink: #f7f7f5;
+  --color-ink-soft: #3b4a5e;
+  --color-muted: #5c5c5a;
+  --color-line: rgb(2 6 17 / 0.09);
+  --color-line-strong: rgb(2 6 17 / 0.16);
+  --color-well: rgb(2 6 17 / 0.06);
+
+  --color-accent: #01c1f2;
+  --color-accent-tint: #e6f7fd;
+  --color-accent-strong: #2563eb;
+  --color-indigo: #4426bc;
+
+  --color-positive: #237a48;
+  --color-warning: #8f6000;
+  --color-danger: #bf3644;
+
+  --color-coral: #c9542b;
+  --color-slate: #637083;
+  --color-earth: #8f6243;
+
+  --radius-card: 1.5rem;
+  --radius-tile: 1rem;
+  --radius-ctl: 999px;
+
+  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.7) inset, 0 24px 48px -30px rgb(0 0 0 / 0.22);
+  --shadow-pop: 0 24px 60px -18px rgb(0 0 0 / 0.28), 0 2px 6px rgb(0 0 0 / 0.07);
+
+  --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+* { box-sizing: border-box; }
+html {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+body { margin: 0; width: 1440px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.025em; margin: 0; }
+p { margin: 0; }
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--color-accent-strong);
+  outline-offset: 2px;
+}
+.on-ink :where(a, button):focus-visible { outline-color: var(--color-accent); }
+
+/* Layout */
+.wrap { max-width: 1200px; margin: 0 auto; padding: 32px 0 120px; }
+header.page { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 24px; }
+.crumbs { font-size: 12px; color: var(--color-muted); margin-bottom: 8px; }
+.page-title { font-size: 40px; line-height: 1.1; }
+.lead { color: var(--color-ink-soft); margin-top: 8px; max-width: 640px; font-size: 14px; line-height: 1.5; }
+section.block { margin-top: 20px; }
+.card { background: var(--color-surface); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 24px; }
+.card > h2 { font-size: 22px; margin-bottom: 4px; }
+.card > .sub { color: var(--color-muted); font-size: 13px; margin-bottom: 20px; }
+.grid { display: grid; gap: 16px; }
+.g2 { grid-template-columns: repeat(2, 1fr); }
+.g3 { grid-template-columns: repeat(3, 1fr); }
+.g4 { grid-template-columns: repeat(4, 1fr); }
+.label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-muted); font-weight: 600; }
+.tile { background: var(--color-solid); border-radius: var(--radius-tile); padding: 16px; }
+.note { font-size: 12px; color: var(--color-muted); line-height: 1.5; }
+code { font-family: var(--font-sans); font-size: 12px; font-weight: 600; color: var(--color-ink-soft); }
+
+/* Swatches */
+.group-title { font-size: 15px; margin: 20px 0 12px; }
+.group-title:first-of-type { margin-top: 0; }
+.swatches { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+.sw { background: var(--color-solid); border-radius: var(--radius-tile); overflow: hidden; border: 1px solid var(--color-line); }
+.sw .chip { height: 64px; border-bottom: 1px solid var(--color-line); }
+.sw .meta { padding: 10px 12px; display: grid; gap: 2px; }
+.sw .meta code { font-size: 11px; color: var(--color-ink); }
+.sw .meta span { font-size: 11px; color: var(--color-muted); }
+
+.dodont { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+.dd { border-radius: var(--radius-tile); padding: 16px; border: 1px solid var(--color-line); }
+.dd .verdict { font-size: 12px; font-weight: 700; display: inline-flex; gap: 6px; align-items: center; margin-bottom: 10px; }
+.dd .sample { font-family: var(--font-display); font-size: 22px; font-weight: 500; margin-bottom: 8px; }
+.dd p.note { margin-top: 4px; }
+.dd.light { background: var(--color-solid); }
+.dd.ink { background: var(--color-ink); color: var(--color-on-ink); border-color: var(--color-ink); }
+.dd.ink .note-ink { font-size: 12px; color: var(--color-on-ink); line-height: 1.5; }
+.v-bad { color: var(--color-danger); }
+.v-good { color: var(--color-positive); }
+.v-good-ink { color: var(--color-accent); }
+
+/* Type scale */
+.type-row { display: grid; grid-template-columns: 220px 1fr; align-items: baseline; gap: 24px; padding: 16px 0; border-top: 1px solid var(--color-line); }
+.type-row:first-of-type { border-top: 0; }
+.t-title { font-family: var(--font-display); font-size: 40px; font-weight: 500; letter-spacing: -0.025em; }
+.t-kpi { font-family: var(--font-display); font-size: 30px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.t-body { font-size: 14px; line-height: 1.5; color: var(--color-ink); }
+.t-body-sm { font-size: 13px; color: var(--color-ink-soft); }
+.t-th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--color-muted); }
+
+/* Shape */
+.shape { display: grid; place-items: center; height: 120px; background: var(--color-solid); border: 1px solid var(--color-line-strong); font-size: 13px; color: var(--color-ink-soft); text-align: center; }
+.r-card { border-radius: var(--radius-card); }
+.r-tile { border-radius: var(--radius-tile); }
+.r-ctl { border-radius: var(--radius-ctl); height: 56px; align-self: center; }
+.shadow-demo { height: 120px; border-radius: var(--radius-tile); background: var(--color-solid); display: grid; place-items: center; font-size: 13px; color: var(--color-ink-soft); text-align: center; }
+.sh-card { box-shadow: var(--shadow-card); }
+.sh-pop { box-shadow: var(--shadow-pop); }
+.motion-demo { display: flex; align-items: center; gap: 16px; }
+.motion-track { flex: 1; height: 12px; background: var(--color-well); border-radius: var(--radius-ctl); position: relative; overflow: hidden; }
+.motion-bar { position: absolute; inset: 0 auto 0 0; width: 30%; background: var(--color-accent-strong); border-radius: var(--radius-ctl); transition: width 200ms var(--ease-soft); }
+.motion-demo:hover .motion-bar, .motion-demo:focus-within .motion-bar { width: 85%; }
+
+/* Buttons */
+.btn { font: inherit; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; border-radius: var(--radius-ctl); border: 1px solid var(--color-ink); background: var(--color-ink); color: var(--color-on-ink); cursor: pointer; padding: 0 18px; height: 40px; font-size: 14px; transition: background-color 200ms var(--ease-soft), box-shadow 200ms var(--ease-soft); }
+.btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.btn:hover { box-shadow: var(--shadow-pop); }
+.btn.secondary { background: var(--color-solid); color: var(--color-ink); border-color: var(--color-line-strong); }
+.btn.secondary:hover { box-shadow: none; background: var(--color-raised); }
+.btn.ghost { background: none; color: var(--color-ink); border: 0; }
+.btn.ghost:hover { background: var(--color-well); box-shadow: none; }
+.btn.danger { background: var(--color-danger); border-color: var(--color-danger); color: var(--color-on-ink); }
+.btn.sm { height: 32px; padding: 0 14px; font-size: 13px; }
+.btn.lg { height: 52px; padding: 0 26px; font-size: 15px; }
+.btn-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.btn-row + .btn-row { margin-top: 16px; }
+
+/* NavPill */
+.nav-pill { display: inline-flex; gap: 4px; padding: 6px; background: var(--color-solid); border-radius: var(--radius-ctl); box-shadow: var(--shadow-card); list-style: none; margin: 0; }
+.nav-pill a { display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; height: 36px; border-radius: var(--radius-ctl); color: var(--color-ink-soft); text-decoration: none; font-weight: 600; font-size: 13px; }
+.nav-pill a:hover { background: var(--color-well); }
+.nav-pill a[aria-current="page"] { background: var(--color-ink); color: var(--color-on-ink); }
+.count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--radius-ctl); background: var(--color-danger); color: var(--color-on-ink); font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* SegmentedTabs */
+.seg { display: inline-flex; gap: 4px; padding: 4px; background: var(--color-well); border-radius: var(--radius-ctl); }
+.seg a { padding: 0 16px; height: 32px; display: inline-flex; align-items: center; border-radius: var(--radius-ctl); color: var(--color-ink-soft); text-decoration: none; font-weight: 600; font-size: 13px; }
+.seg a[aria-current="page"] { background: var(--color-raised); color: var(--color-ink); box-shadow: var(--shadow-card); }
+
+/* KPI */
+.kpi { border-radius: var(--radius-card); padding: 20px 22px; box-shadow: var(--shadow-card); display: grid; gap: 8px; min-height: 196px; }
+.kpi .k-label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.kpi .k-label svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.kpi .k-value { font-family: var(--font-display); font-size: 30px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.kpi .k-delta { font-size: 12px; font-weight: 600; }
+.kpi svg.spark { width: 100%; height: 44px; display: block; }
+.spark polyline { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.kpi.dark { background: var(--color-ink); color: var(--color-on-ink); }
+.kpi.dark .k-delta { color: var(--color-accent); }
+.kpi.dark .spark polyline { stroke: var(--color-accent); }
+.kpi.tint { background: var(--color-accent-tint); color: var(--color-ink); }
+.kpi.tint .k-label { color: var(--color-ink-soft); }
+.kpi.tint .k-delta { color: var(--color-positive); }
+.kpi.tint .spark polyline { stroke: var(--color-accent-strong); }
+.kpi.plain { background: var(--color-surface); color: var(--color-ink); }
+.kpi.plain .k-label { color: var(--color-ink-soft); }
+.kpi.plain .k-delta { color: var(--color-danger); }
+.kpi.plain .spark polyline { stroke: var(--color-accent-strong); }
+.kpi .variant { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+
+/* StatusBadge */
+.badge { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: var(--radius-ctl); background: var(--color-solid); border: 1px solid var(--color-line); font-size: 12px; font-weight: 600; color: var(--color-ink); white-space: nowrap; }
+.dot { width: 8px; height: 8px; border-radius: var(--radius-ctl); background: var(--color-slate); flex: none; }
+.dot.positive { background: var(--color-positive); }
+.dot.warning { background: var(--color-warning); }
+.dot.danger { background: var(--color-danger); }
+.dot.closed { background: var(--color-ink-soft); }
+
+/* FilterChips */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0; }
+.chips a { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: var(--radius-ctl); background: var(--color-solid); border: 1px solid var(--color-line-strong); color: var(--color-ink); text-decoration: none; font-size: 13px; font-weight: 600; }
+.chips a .n { font-variant-numeric: tabular-nums; color: var(--color-muted); font-weight: 600; }
+.chips a[aria-current="true"] { background: var(--color-ink); color: var(--color-on-ink); border-color: var(--color-ink); }
+.chips a[aria-current="true"] .n { color: var(--color-on-ink); }
+
+/* Fields */
+.fields { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.field { display: grid; gap: 6px; }
+.field > label { font-size: 12px; font-weight: 600; color: var(--color-ink-soft); }
+.field .hint { font-size: 12px; color: var(--color-muted); }
+.ctl { font: inherit; font-size: 14px; height: 44px; padding: 0 16px; border-radius: var(--radius-ctl); border: 1px solid var(--color-line-strong); background: var(--color-solid); color: var(--color-ink); width: 100%; }
+.ctl:focus-visible { outline: 2px solid var(--color-accent-strong); outline-offset: 2px; }
+select.ctl { appearance: none; background-image: none; padding-right: 40px; }
+.select-wrap { position: relative; }
+.select-wrap svg { position: absolute; right: 16px; top: 50%; width: 14px; height: 14px; transform: translateY(-50%); pointer-events: none; fill: none; stroke: var(--color-ink-soft); stroke-width: 2; }
+.ctl.num { font-variant-numeric: tabular-nums; text-align: right; }
+
+/* DataTable */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+caption { text-align: left; font-family: var(--font-display); font-size: 18px; font-weight: 500; padding-bottom: 12px; letter-spacing: -0.02em; }
+th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-muted); font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--color-line-strong); white-space: nowrap; }
+td { padding: 12px; border-bottom: 1px solid var(--color-line); color: var(--color-ink); vertical-align: middle; }
+td .subt { display: block; font-size: 12px; color: var(--color-muted); margin-top: 2px; }
+tbody tr:hover { background: var(--color-raised); }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+td a { color: var(--color-accent-strong); font-weight: 600; text-decoration: none; }
+td a:hover { text-decoration: underline; }
+
+/* BarList */
+.barlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.barlist li { display: grid; grid-template-columns: 150px 1fr 90px; gap: 12px; align-items: center; font-size: 13px; }
+.barlist .track { height: 10px; background: var(--color-well); border-radius: var(--radius-ctl); overflow: hidden; }
+.barlist .fill { height: 100%; background: var(--color-accent-strong); border-radius: var(--radius-ctl); }
+.barlist .val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* Toast */
+.toast-stage { background: var(--color-bg); border-radius: var(--radius-tile); height: 140px; display: grid; place-items: end center; padding-bottom: 20px; }
+.toast { display: inline-flex; align-items: center; gap: 12px; background: var(--color-ink); color: var(--color-on-ink); border-radius: var(--radius-ctl); padding: 8px 8px 8px 16px; box-shadow: var(--shadow-pop); font-size: 13px; font-weight: 600; animation: toast-in 250ms var(--ease-soft) both; }
+.toast svg { width: 18px; height: 18px; fill: none; stroke: var(--color-accent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.toast button { font: inherit; font-weight: 700; font-size: 13px; color: var(--color-accent); background: none; border: 0; border-radius: var(--radius-ctl); padding: 6px 12px; cursor: pointer; }
+.toast button:hover { text-decoration: underline; }
+@keyframes toast-in { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* EmptyState */
+.empty { text-align: center; display: grid; justify-items: center; gap: 10px; padding: 32px 16px; background: var(--color-solid); border-radius: var(--radius-tile); border: 1px dashed var(--color-line-strong); }
+.empty svg { width: 40px; height: 40px; fill: none; stroke: var(--color-ink-soft); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.empty h3 { font-size: 18px; }
+.empty p { color: var(--color-ink-soft); font-size: 13px; max-width: 320px; line-height: 1.5; }
+
+footer.foot { margin-top: 24px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<header class="wrap" style="padding-bottom:0">
+  <nav aria-label="Migas de pan" class="crumbs">Matrifer ERP › Diseño › Sistema</nav>
+  <div class="page" style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px">
+    <div>
+      <h1 class="page-title">Sistema de diseño</h1>
+      <p class="lead">Tokens y componentes de Matrifer Moldes, tomados de <code>src/routes/layout.css</code> y <code>docs/DESIGN.md</code>. Planta de inyección de plástico, Moreno, Buenos Aires.</p>
+    </div>
+    <p class="note" style="max-width:340px">Tipografías: Space Grotesk (títulos y números) y Plus Jakarta Sans (cuerpo). La aplicación las autoaloja con <code>@fontsource-variable</code>; esta lámina usa solo pilas del sistema y puede verse con una fuente de respaldo.</p>
+  </div>
+</header>
+
+<main class="wrap" style="padding-top:24px">
+
+  <!-- Colors -->
+  <section class="block card" aria-labelledby="h-colores">
+    <h2 id="h-colores">Colores</h2>
+    <p class="sub">Definidos una sola vez en el <code>@theme</code>. El azul es el único color de datos; rojo, verde y dorado son para estados.</p>
+
+    <h3 class="group-title">Superficies</h3>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:var(--color-bg)"></div><div class="meta"><code>--color-bg</code><span>#efefec · fondo de página</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-surface)"></div><div class="meta"><code>--color-surface</code><span>#f8f8f6 · tarjetas</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-raised)"></div><div class="meta"><code>--color-raised</code><span>#fcfcfb · pestaña activa</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-solid)"></div><div class="meta"><code>--color-solid</code><span>#ffffff · campos, modales</span></div></div>
+    </div>
+
+    <h3 class="group-title">Texto y énfasis</h3>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:var(--color-ink)"></div><div class="meta"><code>--color-ink</code><span>#020611 · texto, primario</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-on-ink)"></div><div class="meta"><code>--color-on-ink</code><span>#f7f7f5 · texto sobre tinta</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-ink-soft)"></div><div class="meta"><code>--color-ink-soft</code><span>#3b4a5e · secundario</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-muted)"></div><div class="meta"><code>--color-muted</code><span>#5c5c5a · etiquetas</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-line)"></div><div class="meta"><code>--color-line</code><span>rgb(2 6 17 / 0.09)</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-line-strong)"></div><div class="meta"><code>--color-line-strong</code><span>rgb(2 6 17 / 0.16)</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-well)"></div><div class="meta"><code>--color-well</code><span>rgb(2 6 17 / 0.06)</span></div></div>
+    </div>
+
+    <h3 class="group-title">Marca</h3>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:var(--color-accent)"></div><div class="meta"><code>--color-accent</code><span>#01c1f2 · solo relleno o sobre tinta</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-accent-tint)"></div><div class="meta"><code>--color-accent-tint</code><span>#e6f7fd · KPI destacada</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-accent-strong)"></div><div class="meta"><code>--color-accent-strong</code><span>#2563eb · enlaces y líneas</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-indigo)"></div><div class="meta"><code>--color-indigo</code><span>#4426bc · segunda serie</span></div></div>
+    </div>
+
+    <div class="dodont" role="group" aria-label="Uso correcto e incorrecto del cian de la marca">
+      <div class="dd light">
+        <p class="verdict v-bad"><span aria-hidden="true">✕</span> Incorrecto · cian sobre claro (≈ 2:1)</p>
+        <p class="sample" style="color:var(--color-accent)">Ver partes del turno</p>
+        <p class="note">Ejemplo de lo que no se hace: el texto cian sobre superficie clara no alcanza AA.</p>
+      </div>
+      <div class="dd light">
+        <p class="verdict v-good"><span aria-hidden="true">✓</span> Correcto · <code>--color-accent-strong</code> sobre claro (≈ 4,8:1)</p>
+        <p class="sample" style="color:var(--color-accent-strong)">Ver partes del turno</p>
+        <p class="note">Enlaces, texto de acento y líneas finas de gráficos sobre fondo claro.</p>
+      </div>
+      <div class="dd ink on-ink">
+        <p class="verdict v-good-ink"><span aria-hidden="true">✓</span> Correcto · cian sobre tinta (≈ 9:1)</p>
+        <p class="sample" style="color:var(--color-accent)">Ver partes del turno</p>
+        <p class="note-ink">Sobre <code style="color:var(--color-on-ink)">--color-ink</code> el cian sí lleva texto y líneas. También vale como relleno con texto en tinta encima.</p>
+      </div>
+    </div>
+
+    <h3 class="group-title">Estados <span class="note">· siempre con texto o ícono</span></h3>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:var(--color-positive)"></div><div class="meta"><code>--color-positive</code><span>#237a48 · ingresos, suba</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-warning)"></div><div class="meta"><code>--color-warning</code><span>#8f6000 · a revisar</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-danger)"></div><div class="meta"><code>--color-danger</code><span>#bf3644 · alertas, anulado</span></div></div>
+    </div>
+
+    <h3 class="group-title">Series de gráficos</h3>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:var(--color-coral)"></div><div class="meta"><code>--color-coral</code><span>#c9542b · egresos</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-slate)"></div><div class="meta"><code>--color-slate</code><span>#637083 · serie extra</span></div></div>
+      <div class="sw"><div class="chip" style="background:var(--color-earth)"></div><div class="meta"><code>--color-earth</code><span>#8f6243 · serie extra</span></div></div>
+    </div>
+  </section>
+
+  <!-- Typography + shape -->
+  <div class="grid g2 block">
+    <section class="card" aria-labelledby="h-tipo">
+      <h2 id="h-tipo">Tipografía</h2>
+      <p class="sub"><code>--font-display</code> para títulos y números; <code>--font-sans</code> para el cuerpo. Base 14 px.</p>
+      <div class="type-row"><span class="label">Título · 40 px / 500</span><span class="t-title">Producción</span></div>
+      <div class="type-row"><span class="label">KPI · 30 px tabular</span><span class="t-kpi">$ 18.426.375,00</span></div>
+      <div class="type-row"><span class="label">Cuerpo · 14 px</span><span class="t-body">Parte cargado por la Inyectora 3, molde Respaldos grandes verde.</span></div>
+      <div class="type-row"><span class="label">Cuerpo · 13 px</span><span class="t-body-sm">Precio vigente: $ 637,75 por unidad desde el 01/11/2026.</span></div>
+      <div class="type-row"><span class="label">Encabezado de tabla · 11 px</span><span class="t-th">Fecha · Turno · Molde · Cantidad</span></div>
+    </section>
+
+    <section class="card" aria-labelledby="h-forma">
+      <h2 id="h-forma">Forma, sombras y movimiento</h2>
+      <p class="sub">Radios grandes, sombras casi invisibles, transiciones breves.</p>
+      <div class="grid g3">
+        <div class="shape r-card"><span><code>--radius-card</code><br>24 px · tarjetas</span></div>
+        <div class="shape r-tile"><span><code>--radius-tile</code><br>16 px · internas</span></div>
+        <div class="shape r-ctl"><span><code>--radius-ctl</code> · píldora</span></div>
+      </div>
+      <div class="grid g2" style="margin-top:20px">
+        <div class="shadow-demo sh-card"><span><code>--shadow-card</code><br>tarjetas</span></div>
+        <div class="shadow-demo sh-pop"><span><code>--shadow-pop</code><br>menús, modales, avisos</span></div>
+      </div>
+      <div class="tile" style="margin-top:20px;border:1px solid var(--color-line)">
+        <p class="label" style="margin-bottom:10px"><code>--ease-soft</code> · cubic-bezier(0.2, 0.8, 0.2, 1) · 200 ms</p>
+        <div class="motion-demo"><button class="btn secondary sm" type="button">Pasá el cursor o enfocá</button><div class="motion-track" aria-hidden="true"><div class="motion-bar"></div></div></div>
+        <p class="note" style="margin-top:8px">Se desactiva con <code>prefers-reduced-motion</code>. La vista del Operario no usa animaciones.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- Navigation -->
+  <section class="block card" aria-labelledby="h-nav">
+    <h2 id="h-nav">Navegación</h2>
+    <p class="sub"><code>NavPill</code>: activo en píldora de tinta; contadores de pendientes en rojo. <code>SegmentedTabs</code>: cambia por URL (<code>?vista=</code>).</p>
+    <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:center">
+      <nav aria-label="Módulos">
+        <ul class="nav-pill">
+          <li><a href="#">Dashboard</a></li>
+          <li><a href="#" aria-current="page">Producción <span class="count" aria-label="6 partes a revisar">6</span></a></li>
+          <li><a href="#">Gastos</a></li>
+          <li><a href="#">Precios</a></li>
+          <li><a href="#">Período</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Vistas de producción" class="seg">
+        <a href="#" aria-current="page">Partes</a>
+        <a href="#">Por máquina</a>
+        <a href="#">Por molde</a>
+      </nav>
+    </div>
+  </section>
+
+  <!-- Buttons -->
+  <section class="block card" aria-labelledby="h-btn">
+    <h2 id="h-btn">Botones</h2>
+    <p class="sub">Todos en píldora. Primario en tinta, secundario con borde, fantasma, peligro. Tamaños sm, md y lg.</p>
+    <div class="btn-row">
+      <button class="btn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Cargar parte</button>
+      <button class="btn secondary" type="button">Exportar CSV</button>
+      <button class="btn ghost" type="button">Cancelar</button>
+      <button class="btn danger" type="button">Anular parte</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn sm" type="button">Guardar</button>
+      <button class="btn" type="button">Guardar</button>
+      <button class="btn lg" type="button">Cerrar período</button>
+      <span class="note">sm 32 px · md 40 px · lg 52 px</span>
+    </div>
+  </section>
+
+  <!-- KPIs -->
+  <section class="block" aria-labelledby="h-kpi">
+    <h2 id="h-kpi" style="font-size:22px;margin:0 0 12px 4px">Tarjetas KPI <span class="note" style="font-family:var(--font-sans);letter-spacing:0">· variantes dark, tint y plain</span></h2>
+    <div class="grid g3">
+      <article class="kpi dark on-ink">
+        <p class="variant">dark</p>
+        <p class="k-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M7 16V9m5 7V5m5 11v-4"/></svg>Facturación de noviembre</p>
+        <p class="k-value">$ 18.426.375,00</p>
+        <p class="k-delta">+8,4 % frente a octubre</p>
+        <svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none" role="img" aria-label="Tendencia diaria en alza"><polyline points="0,36 25,32 50,34 75,26 100,28 125,22 150,24 175,16 200,18 225,12 250,14 275,8 300,6"/></svg>
+      </article>
+      <article class="kpi tint">
+        <p class="variant">tint</p>
+        <p class="k-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4-8-4zm0 5l8 4 8-4M4 17l8 4 8-4"/></svg>Piezas producidas</p>
+        <p class="k-value">28.893</p>
+        <p class="k-delta">+3,1 % frente a octubre</p>
+        <svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none" role="img" aria-label="Piezas por día, estable con leve suba"><polyline points="0,28 25,30 50,24 75,26 100,20 125,24 150,18 175,22 200,16 225,20 250,14 275,16 300,12"/></svg>
+      </article>
+      <article class="kpi plain">
+        <p class="variant">plain</p>
+        <p class="k-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h18v10H3zM7 12h.01M17 12h.01"/><circle cx="12" cy="12" r="2"/></svg>Gastos de noviembre</p>
+        <p class="k-value">$ 6.204.110,50</p>
+        <p class="k-delta">+12,6 % frente a octubre</p>
+        <svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none" role="img" aria-label="Gastos acumulados en alza"><polyline points="0,38 25,36 50,30 75,31 100,26 125,22 150,23 175,18 200,14 225,15 250,10 275,8 300,6"/></svg>
+      </article>
+    </div>
+  </section>
+
+  <!-- Status, chips, fields -->
+  <div class="grid g2 block">
+    <section class="card" aria-labelledby="h-estado">
+      <h2 id="h-estado">Estados y filtros</h2>
+      <p class="sub"><code>StatusBadge</code>: punto de color y texto siempre visible. <code>FilterChips</code> con contador.</p>
+      <div class="btn-row">
+        <span class="badge"><span class="dot positive" aria-hidden="true"></span>Activo</span>
+        <span class="badge"><span class="dot warning" aria-hidden="true"></span>A revisar</span>
+        <span class="badge"><span class="dot danger" aria-hidden="true"></span>Anulado</span>
+        <span class="badge"><span class="dot closed" aria-hidden="true"></span>Cerrado</span>
+      </div>
+      <nav aria-label="Filtrar partes por estado" style="margin-top:20px">
+        <ul class="chips">
+          <li><a href="#" aria-current="true">Todos <span class="n">128</span></a></li>
+          <li><a href="#">Activos <span class="n">120</span></a></li>
+          <li><a href="#">A revisar <span class="n">6</span></a></li>
+          <li><a href="#">Anulados <span class="n">2</span></a></li>
+        </ul>
+      </nav>
+    </section>
+
+    <section class="card" aria-labelledby="h-empty">
+      <h2 id="h-empty">Estado vacío y aviso</h2>
+      <p class="sub"><code>EmptyState</code> obligatorio cuando no hay registros. <code>Toast</code>: píldora de tinta abajo, 5 s.</p>
+      <div class="grid g2">
+        <div class="empty">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM8 9h8M8 13h5"/></svg>
+          <h3>No hay partes a revisar</h3>
+          <p>Ningún parte del turno Noche del 14/11/2026 quedó marcado para revisión.</p>
+          <button class="btn secondary sm" type="button">Ver todos los partes</button>
+        </div>
+        <div class="toast-stage">
+          <div class="toast on-ink" role="status">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5L19 7"/></svg>
+            Parte anulado
+            <button type="button">Deshacer</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="block card" aria-labelledby="h-campos">
+    <h2 id="h-campos">Campos</h2>
+    <p class="sub">En píldora, con la etiqueta arriba. HTML nativo; cantidad con teclado numérico.</p>
+    <form class="fields" action="#" onsubmit="return false">
+      <div class="field">
+        <label for="f-fecha">Fecha del parte</label>
+        <input class="ctl" id="f-fecha" type="date" value="2026-11-14">
+      </div>
+      <div class="field">
+        <label for="f-maquina">Máquina</label>
+        <div class="select-wrap">
+          <select class="ctl" id="f-maquina">
+            <option>Inyectora 3</option>
+            <option>Inyectora 1</option>
+            <option>Inyectora 2</option>
+            <option>Inyectora 4</option>
+          </select>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-molde">Molde</label>
+        <input class="ctl" id="f-molde" type="text" value="Respaldos grandes verde">
+      </div>
+      <div class="field">
+        <label for="f-cant">Cantidad</label>
+        <input class="ctl num" id="f-cant" type="number" inputmode="numeric" min="1" value="1240" aria-describedby="f-cant-hint">
+        <span class="hint" id="f-cant-hint">Mínimo 1 unidad.</span>
+      </div>
+    </form>
+  </section>
+
+  <!-- Table + BarList -->
+  <div class="grid block" style="grid-template-columns:2fr 1fr">
+    <section class="card" aria-labelledby="h-tabla">
+      <h2 id="h-tabla">Tabla de datos</h2>
+      <p class="sub">Encabezado en mayúsculas; columnas numéricas a la derecha.</p>
+      <table>
+        <caption>Partes de producción</caption>
+        <thead>
+          <tr><th scope="col">Fecha</th><th scope="col">Turno</th><th scope="col">Operario</th><th scope="col">Máquina</th><th scope="col">Molde</th><th scope="col" class="num">Cantidad</th><th scope="col">Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><a href="#">14/11/2026</a></td><td>Noche</td><td>R. Gómez</td><td>Inyectora 3</td><td>Respaldos grandes verde<span class="subt">$ 637,75 / u.</span></td><td class="num">1.240</td><td><span class="badge"><span class="dot positive" aria-hidden="true"></span>Activo</span></td></tr>
+          <tr><td><a href="#">14/11/2026</a></td><td>Tarde</td><td>M. Fernández</td><td>Inyectora 1</td><td>Tapa balde 20 L</td><td class="num">3.600</td><td><span class="badge"><span class="dot warning" aria-hidden="true"></span>A revisar</span></td></tr>
+          <tr><td><a href="#">14/11/2026</a></td><td>Mañana</td><td>L. Acosta</td><td>Inyectora 2</td><td>Cajón frutero</td><td class="num">980</td><td><span class="badge"><span class="dot positive" aria-hidden="true"></span>Activo</span></td></tr>
+          <tr><td><a href="#">13/11/2026</a></td><td>Noche</td><td>R. Gómez</td><td>Inyectora 3</td><td>Respaldos grandes verde</td><td class="num">3</td><td><span class="badge"><span class="dot danger" aria-hidden="true"></span>Anulado</span></td></tr>
+          <tr><td><a href="#">31/10/2026</a></td><td>Tarde</td><td>M. Fernández</td><td>Inyectora 4</td><td>Maceta N.º 30</td><td class="num">2.150</td><td><span class="badge"><span class="dot closed" aria-hidden="true"></span>Cerrado</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card" aria-labelledby="h-bar">
+      <h2 id="h-bar">Producción por máquina</h2>
+      <p class="sub"><code>BarList</code> · piezas de noviembre.</p>
+      <ul class="barlist">
+        <li><span>Inyectora 3</span><span class="track" aria-hidden="true"><span class="fill" style="display:block;width:100%"></span></span><span class="val">9.840</span></li>
+        <li><span>Inyectora 1</span><span class="track" aria-hidden="true"><span class="fill" style="display:block;width:78%"></span></span><span class="val">7.675</span></li>
+        <li><span>Inyectora 2</span><span class="track" aria-hidden="true"><span class="fill" style="display:block;width:63%"></span></span><span class="val">6.198</span></li>
+        <li><span>Inyectora 4</span><span class="track" aria-hidden="true"><span class="fill" style="display:block;width:52%"></span></span><span class="val">5.180</span></li>
+      </ul>
+      <div class="tile" style="margin-top:20px;border:1px solid var(--color-line)">
+        <p class="label">Facturación del parte</p>
+        <p class="t-body" style="margin-top:6px">3 u. × $ 637,75 = <strong style="font-variant-numeric:tabular-nums">$ 1.913,25</strong></p>
+      </div>
+    </section>
+  </div>
+
+  <footer class="foot note">Fuentes: <code>src/routes/layout.css</code> (valores) y <code>docs/DESIGN.md</code> §2–§4 y §6 (reglas). Contenido de ejemplo; los nombres de turno son provisorios.</footer>
+</main>
+</body>
+</html>

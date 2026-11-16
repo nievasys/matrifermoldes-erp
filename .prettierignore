@@ -18,3 +18,6 @@ bun.lockb
 /worker-configuration.d.ts
 /supabase/.temp/
 /supabase/.branches/
+
+# Design artboards are self-contained documents
+/design/
