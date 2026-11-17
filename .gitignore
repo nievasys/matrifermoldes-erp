@@ -35,3 +35,4 @@ test-results
 
 # Reference video of the third-party demo (study material, never versioned)
 /cadra.mp4
+*.xlsx

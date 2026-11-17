@@ -16,54 +16,20 @@
 	import BarList from '#lib/components/BarList.svelte';
 	import SegmentedTabs from '#lib/components/SegmentedTabs.svelte';
 
-	// Mock data - in real app this would come from load function
-	const periodo = { mes: 'Noviembre', año: 2026, estado: 'Abierto' as const };
+	const { data } = $props();
 
-	const kpis = {
-		facturacion: {
-			value: '$ 18.426.375,00',
-			delta: '+8,4 % frente a octubre',
-			sparkline: [11.2, 10.4, 12.9, 13.6, 14.8, 13.1, 15.7, 16.2, 15.4, 17.0, 18.4]
-		},
-		piezas: {
-			value: '28.893',
-			delta: '+3,1 % frente a octubre',
-			sparkline: [24000, 23500, 25000, 26000, 27000, 25500, 27500, 28000, 27000, 28000, 28893]
-		},
-		gastos: {
-			value: '$ 6.204.110,50',
-			delta: '+12,6 % frente a octubre',
-			sparkline: [4.9, 4.7, 5.1, 5.3, 5.6, 5.4, 5.8, 5.9, 5.7, 5.5, 6.2]
-		},
-		ganancia: {
-			value: '$ 12.222.264,50',
-			delta: 'Margen 66,3 %',
-			sparkline: [6.3, 5.7, 7.8, 8.3, 9.2, 7.7, 9.9, 10.3, 9.7, 11.5, 12.2]
-		}
-	};
+	const { periodo, kpis, resumen, porMaquina, porMolde } = data;
 
+	// Format helpers
+	const fmt = (n: number) =>
+		new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(n);
+	const fmtNum = (n: number) => n.toLocaleString('es-AR');
+
+	// Timeline mock (will come from today's reports)
 	const partesHoy = [
-		{ time: '06:58', label: 'R. Gómez' },
-		{ time: '07:40', label: 'M. Fernández' },
-		{ time: '08:15', label: 'L. Acosta' },
-		{ time: '08:52', label: 'R. Gómez' },
-		{ time: '09:30', label: 'M. Fernández' },
-		{ time: '10:05', label: 'L. Acosta' },
-		{ time: '10:31', label: 'R. Gómez' }
-	];
-
-	const facturacionMaquina = [
-		{ name: 'Inyectora 3', value: 6276340, formattedValue: '$ 6.276.340', extra: '9.840' },
-		{ name: 'Inyectora 1', value: 4893770, formattedValue: '$ 4.893.770', extra: '7.675' },
-		{ name: 'Inyectora 2', value: 3951960, formattedValue: '$ 3.951.960', extra: '6.198' },
-		{ name: 'Inyectora 4', value: 2454305, formattedValue: '$ 2.454.305', extra: '5.180' }
-	];
-
-	const facturacionMolde = [
-		{ name: 'Respaldos gdes verde', value: 6275460, formattedValue: '$ 6.275.460', extra: '9.840' },
-		{ name: 'Tapa balde 20 L', value: 4605000, formattedValue: '$ 4.605.000', extra: '7.675' },
-		{ name: 'Cajón frutero', value: 3718800, formattedValue: '$ 3.718.800', extra: '6.198' },
-		{ name: 'Maceta N.º 30', value: 2977115, formattedValue: '$ 2.977.115', extra: '5.180' }
+		{ time: '06:58', label: 'Dylan' },
+		{ time: '07:40', label: 'Ezequiel' },
+		{ time: '08:15', label: 'Gonzalo' }
 	];
 
 	let vistaFacturacion = $state('maquina');
@@ -118,12 +84,14 @@
 
 <section class="hero-row" aria-label="Resumen del día">
 	<article class="card hero-card">
-		<p class="card-sm">Lunes 16 de noviembre de 2026</p>
+		<p class="card-sm">Noviembre de 2026</p>
 		<h2 class="greeting">Buen día, Marcela.</h2>
 		<p class="summary">
-			Hoy se cargaron <strong>7 partes</strong> con un total de <strong>2.140 piezas</strong>.
-			<span class="danger">6 partes están marcados a revisar</span> porque se cargaron fuera del horario
-			del turno.
+			Este mes se cargaron <strong>{resumen.partes} partes</strong> con un total de
+			<strong>{fmtNum(resumen.piezas)} piezas</strong>.
+			{#if resumen.revisar > 0}
+				<span class="danger">{resumen.revisar} partes están marcados a revisar.</span>
+			{/if}
 		</p>
 		<Timeline
 			label="Turno Mañana (06:00 – 14:00)"
@@ -179,7 +147,7 @@
 	<KpiCard
 		variant="dark"
 		label="Facturación de noviembre"
-		value={kpis.facturacion.value}
+		value={fmt(kpis.facturacion.value)}
 		delta={kpis.facturacion.delta}
 		sparkline={kpis.facturacion.sparkline}
 		href="/facturacion"
@@ -190,7 +158,7 @@
 	<KpiCard
 		variant="tint"
 		label="Piezas producidas"
-		value={kpis.piezas.value}
+		value={fmtNum(kpis.piezas.value)}
 		delta={kpis.piezas.delta}
 		sparkline={kpis.piezas.sparkline}
 		href="/produccion"
@@ -201,7 +169,7 @@
 	<KpiCard
 		variant="plain"
 		label="Gastos deducibles"
-		value={kpis.gastos.value}
+		value={fmt(kpis.gastos.value)}
 		delta={kpis.gastos.delta}
 		deltaUp={false}
 		sparkline={kpis.gastos.sparkline}
@@ -213,7 +181,7 @@
 	<KpiCard
 		variant="plain"
 		label="Ganancia neta"
-		value={kpis.ganancia.value}
+		value={fmt(kpis.ganancia.value)}
 		delta={kpis.ganancia.delta}
 		sparkline={kpis.ganancia.sparkline}
 		href="/reportes"
@@ -275,9 +243,9 @@
 		/>
 		<div style="margin-top: 14px;">
 			{#if vistaFacturacion === 'maquina'}
-				<BarList items={facturacionMaquina} ariaLabel="Facturación por máquina" />
+				<BarList items={porMaquina} ariaLabel="Facturación por máquina" />
 			{:else}
-				<BarList items={facturacionMolde} ariaLabel="Facturación por molde" />
+				<BarList items={porMolde} ariaLabel="Facturación por molde" />
 			{/if}
 		</div>
 	</Card>
