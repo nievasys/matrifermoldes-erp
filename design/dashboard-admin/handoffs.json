@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "chosen": "01-resumen-del-dia.html",
+  "handoffs": {
+    "01-resumen-del-dia.html": {
+      "status": "implemented",
+      "queued": false,
+      "sentAt": "2026-11-17T00:34:04.684Z",
+      "startedAt": "2026-11-17T00:34:13.671Z",
+      "implementedAt": "2026-11-17T00:39:52.602Z",
+      "note": "Dashboard implementado con todos los componentes",
+      "previewUrl": "http://localhost:5173/dashboard"
+    }
+  }
+}

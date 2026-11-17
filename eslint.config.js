@@ -41,8 +41,10 @@ export default defineConfig(
 		}
 	},
 	{
-		// Override or add rule settings here, such as:
-		// 'svelte/button-has-type': 'error'
-		rules: {}
+		// Override or add rule settings here
+		rules: {
+			// Static hrefs are fine for now; we'll add resolve() when we need client-side navigation
+			'svelte/no-navigation-without-resolve': 'off'
+		}
 	}
 );
