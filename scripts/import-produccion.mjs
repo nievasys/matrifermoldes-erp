@@ -1,5 +1,5 @@
 /**
- * Importa el Excel de producción a Supabase local
+ * Importa la hoja "Datos" del Excel de producción a Supabase local
  * Uso: node scripts/import-produccion.mjs
  */
 
@@ -12,12 +12,14 @@ const client = new Client({
 	connectionString: 'postgresql://postgres:postgres@127.0.0.1:54322/postgres'
 });
 
-// Parse Excel date
-function parseDate(d) {
-	if (typeof d === 'number') {
-		return new Date((d - 25569) * 86400 * 1000);
+// Parse Excel date serial number
+function parseExcelDate(serial) {
+	if (typeof serial === 'number') {
+		// Excel serial date (days since 1900-01-01, with the 1900 leap year bug)
+		const date = new Date((serial - 25569) * 86400 * 1000);
+		return date.toISOString().split('T')[0];
 	}
-	return new Date(d);
+	return null;
 }
 
 async function main() {
@@ -31,13 +33,12 @@ async function main() {
     set local app.user_role = 'SYSTEM';
   `);
 
-	// First, create a system profile for imports (bypass audit for this)
+	// Create system profile for imports
 	await client.query(`
     insert into auth.users (id, email)
     values ('00000000-0000-0000-0000-000000000000', 'system@matrifer.local')
     on conflict (id) do nothing
   `);
-	// Temporarily disable audit trigger for profiles insert
 	await client.query(`alter table app.profiles disable trigger z_audit`);
 	await client.query(`
     insert into app.profiles (id, full_name, role, active)
@@ -46,14 +47,14 @@ async function main() {
   `);
 	await client.query(`alter table app.profiles enable trigger z_audit`);
 
-	// Read Excel
+	// Read Excel - hoja "Datos"
 	const wb = XLSX.readFile('Producción MATRIFER .xlsx');
-	const ws = wb.Sheets[wb.SheetNames[0]];
+	const ws = wb.Sheets['Datos'];
 	const raw = XLSX.utils.sheet_to_json(ws);
 
-	// Filter valid rows
-	const data = raw.filter((r) => r.Fecha && r.Maquina);
-	console.log(`Parseados ${data.length} registros del Excel\n`);
+	// Filter valid rows (must have FECHA and Maquina)
+	const data = raw.filter((r) => r.FECHA && r.Maquina && r['C. Tot']);
+	console.log(`Parseados ${data.length} registros de la hoja "Datos"\n`);
 
 	// Collect unique values for catalogs
 	const machines = new Set();
@@ -61,16 +62,9 @@ async function main() {
 	const shifts = new Set();
 
 	data.forEach((r) => {
-		machines.add(r.Maquina.trim());
-		if (r.Molde) molds.add(r.Molde.trim());
-		if (r.Turno) shifts.add(r.Turno.trim());
-
-		// Additional molds
-		Object.keys(r).forEach((k) => {
-			if (k.startsWith('Molde') && r[k] && typeof r[k] === 'string') {
-				molds.add(r[k].trim());
-			}
-		});
+		if (r.Maquina) machines.add(r.Maquina.toString().trim());
+		if (r.MOLDE) molds.add(r.MOLDE.toString().trim());
+		if (r.TURNO) shifts.add(r.TURNO.toString().trim());
 	});
 
 	console.log(`Máquinas: ${machines.size}`);
@@ -119,105 +113,135 @@ async function main() {
 	}
 	console.log(`✓ ${shifts.size} turnos insertados`);
 
+	// Group by date+shift+operator to create production reports
+	const reportGroups = new Map();
+
+	for (const r of data) {
+		const fecha = parseExcelDate(r.FECHA);
+		if (!fecha) continue;
+
+		const turno = r.TURNO?.toString().trim() || 'SIN TURNO';
+		const operario = r.OPERARIO?.toString().trim() || '';
+		const key = `${fecha}|${turno}|${operario}`;
+
+		if (!reportGroups.has(key)) {
+			reportGroups.set(key, {
+				fecha,
+				turno,
+				operario,
+				lines: []
+			});
+		}
+
+		const cantidad = parseInt(r['C. Tot']) || 0;
+		if (cantidad <= 0) continue;
+
+		reportGroups.get(key).lines.push({
+			maquina: r.Maquina.toString().trim(),
+			molde: r.MOLDE?.toString().trim(),
+			cantidad,
+			cantidadHora: parseInt(r.CxH) || null,
+			parada: r['Parada de maq. / Motivo'] || null
+		});
+	}
+
+	console.log(`\n${reportGroups.size} grupos de partes encontrados`);
+
 	// Insert production reports and lines
 	let reportCount = 0;
 	let lineCount = 0;
 
-	for (const r of data) {
-		const fecha = parseDate(r.Fecha);
-		const submittedAt = r['Marca temporal'] ? parseDate(r['Marca temporal']) : fecha;
+	// Ensure default shift exists
+	await client.query(`
+    insert into app.shifts (name) values ('SIN TURNO')
+    on conflict (name) do nothing
+  `);
+	const defaultShiftRes = await client.query(
+		`select id from app.shifts where name = 'SIN TURNO'`
+	);
+	shiftMap['SIN TURNO'] = defaultShiftRes.rows[0].id;
+
+	for (const [, group] of reportGroups) {
+		if (group.lines.length === 0) continue;
+
+		const shiftId = shiftMap[group.turno] || shiftMap['SIN TURNO'];
 
 		// Insert report
 		const reportRes = await client.query(
 			`insert into app.production_reports (report_date, shift_id, operator_names, submitted_at)
        values ($1, $2, $3, $4)
        returning id`,
-			[fecha.toISOString().split('T')[0], shiftMap[r.Turno.trim()], r.Operario || '', submittedAt]
+			[group.fecha, shiftId, group.operario, group.fecha]
 		);
 		const reportId = reportRes.rows[0].id;
 		reportCount++;
 
-		// Collect all lines from this report
-		const lines = [];
-
-		if (r.Molde && r['Cantidad Total']) {
-			lines.push({
-				molde: r.Molde.trim(),
-				cantidad: parseInt(r['Cantidad Total']) || 0,
-				cantidadHora: parseInt(r['Cantidad x Hora']) || null,
-				parada: r['Parada de máquina/motivo'] || null
-			});
-		}
-
-		// Additional molds (up to 5)
-		const moldeKeys = Object.keys(r).filter(
-			(k) => k.startsWith('Molde') && k !== 'Molde' && r[k] && typeof r[k] === 'string'
-		);
-		moldeKeys.forEach((key) => {
-			const suffix = key.replace('Molde', '').replace('_', '');
-			const cantKey = Object.keys(r).find(
-				(k) => k.startsWith('Cantidad Total') && k.includes(suffix)
-			);
-			const horaKey = Object.keys(r).find(
-				(k) => k.startsWith('Cantidad x Hora') && k.includes(suffix)
-			);
-
-			if (r[cantKey]) {
-				lines.push({
-					molde: r[key].trim(),
-					cantidad: parseInt(r[cantKey]) || 0,
-					cantidadHora: horaKey ? parseInt(r[horaKey]) || null : null,
-					parada: null
-				});
-			}
-		});
-
 		// Insert lines
-		for (const line of lines) {
-			if (line.cantidad <= 0) continue;
-
+		for (const line of group.lines) {
+			const machineId = machineMap[line.maquina];
 			const moldId = moldMap[line.molde];
-			if (!moldId) {
-				console.warn(`  Molde no encontrado: ${line.molde}`);
+
+			if (!machineId || !moldId) {
 				continue;
 			}
 
 			await client.query(
 				`insert into app.production_lines (report_id, machine_id, mold_id, quantity, quantity_hour)
          values ($1, $2, $3, $4, $5)`,
-				[reportId, machineMap[r.Maquina.trim()], moldId, line.cantidad, line.cantidadHora]
+				[reportId, machineId, moldId, line.cantidad, line.cantidadHora]
 			);
 			lineCount++;
 
 			// Insert downtime if present
-			if (line.parada) {
+			if (line.parada && line.parada.toString().trim()) {
 				await client.query(
 					`insert into app.production_downtimes (line_id, reason_text)
            values (currval('app.production_lines_id_seq'), $1)`,
-					[line.parada]
+					[line.parada.toString().trim()]
 				);
 			}
 		}
 	}
 
-	console.log(`\n✓ ${reportCount} partes de producción`);
+	console.log(`✓ ${reportCount} partes de producción`);
 	console.log(`✓ ${lineCount} líneas de producción`);
 
-	// Verify with a query
+	// Verify with queries
 	const stats = await client.query(`
     select
       count(distinct r.id) as partes,
       sum(l.quantity) as piezas,
       count(distinct l.machine_id) as maquinas,
-      count(distinct l.mold_id) as moldes
+      count(distinct l.mold_id) as moldes,
+      min(r.report_date) as desde,
+      max(r.report_date) as hasta
     from app.production_reports r
     join app.production_lines l on l.report_id = r.id
   `);
+
 	console.log('\n=== Verificación ===');
 	console.log(`Partes: ${stats.rows[0].partes}`);
 	console.log(`Piezas: ${parseInt(stats.rows[0].piezas).toLocaleString('es-AR')}`);
 	console.log(`Máquinas: ${stats.rows[0].maquinas}`);
 	console.log(`Moldes: ${stats.rows[0].moldes}`);
+	console.log(`Período: ${stats.rows[0].desde} → ${stats.rows[0].hasta}`);
+
+	// Monthly breakdown
+	const monthly = await client.query(`
+    select
+      to_char(date_trunc('month', r.report_date), 'YYYY-MM') as mes,
+      count(distinct r.id) as partes,
+      sum(l.quantity) as piezas
+    from app.production_reports r
+    join app.production_lines l on l.report_id = r.id
+    group by 1
+    order by 1
+  `);
+
+	console.log('\n=== Por mes ===');
+	for (const row of monthly.rows) {
+		console.log(`${row.mes}: ${row.partes} partes, ${parseInt(row.piezas).toLocaleString('es-AR')} pzas`);
+	}
 
 	await client.query('COMMIT');
 	await client.end();
