@@ -32,7 +32,6 @@
 <style>
 	.main-content {
 		margin-left: 72px;
-		padding: 0 20px 40px;
-		max-width: 1140px;
+		padding: 0 32px 40px;
 	}
 </style>

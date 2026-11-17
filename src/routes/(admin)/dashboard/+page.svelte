@@ -366,7 +366,7 @@
 	/* Hero row */
 	.hero-row {
 		display: grid;
-		grid-template-columns: 1fr 300px;
+		grid-template-columns: 1fr minmax(280px, 340px);
 		gap: 16px;
 		margin-bottom: 16px;
 	}
@@ -499,7 +499,7 @@
 	/* Bottom row */
 	.bottom-row {
 		display: grid;
-		grid-template-columns: 1fr 360px;
+		grid-template-columns: 1fr minmax(320px, 400px);
 		gap: 16px;
 	}
 
